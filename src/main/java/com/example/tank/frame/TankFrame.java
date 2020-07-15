@@ -1,4 +1,7 @@
-package com.example.tank.demo;
+package com.example.tank.frame;
+
+import com.example.tank.frame.listener.MyKeyListener;
+import com.example.tank.util.Constant;
 
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -12,16 +15,16 @@ import java.awt.event.WindowEvent;
  */
 public class TankFrame extends Frame{
 
-    int x = 100;
-    int y = 100;
+    public static int x = Constant.TankInitX;
+    public static int y = Constant.TankInitY;
 
     public TankFrame() {
-        this.setSize(800, 600);
+        this.setSize(Constant.FrameSizeWidth, Constant.FrameSizeHeight);
         this.setResizable(false);
         this.setVisible(true);
         this.setTitle("坦克大战1.0");
 
-        this.addKeyListener(new MykeyListener());
+        this.addKeyListener(new MyKeyListener());
 
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -33,21 +36,7 @@ public class TankFrame extends Frame{
 
     @Override
     public void paint(Graphics g){
-        System.out.println("Paint...");
-        g.fillRect(x, y, 50, 50);
-        x += 100;
+        if (x < 0 || x > 800)
+        g.fillRect(x, y, 30, 30);
     }
-
-    class MykeyListener extends KeyAdapter{
-        @Override
-        public void keyPressed(KeyEvent e) {
-            System.out.println("111");
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-            System.out.println("222");
-        }
-    }
-
 }
