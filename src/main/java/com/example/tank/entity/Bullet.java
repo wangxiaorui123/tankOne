@@ -1,8 +1,10 @@
 package com.example.tank.entity;
 
 import com.example.tank.enums.Dir;
+import com.example.tank.enums.Group;
 import com.example.tank.frame.TankFrame;
 import com.example.tank.util.Constant;
+import com.example.tank.util.ResourceManager;
 
 import java.awt.*;
 
@@ -16,14 +18,6 @@ import java.awt.*;
  */
 public class Bullet {
     /**
-     * 子弹宽度
-     */
-    private final int bulletWidth = 5;
-    /**
-     * 子弹高度
-     */
-    private final int bulletHeight = 5;
-    /**
      * 子弹x坐标
      */
     private int x;
@@ -31,6 +25,14 @@ public class Bullet {
      * 子弹y坐标
      */
     private int y;
+    /**
+     * 子弹宽度
+     */
+    private int bulletWidth = ResourceManager.bulletU.getWidth();
+    /**
+     * 子弹高度
+     */
+    private int bulletHeight = ResourceManager.bulletU.getHeight();
     /**
      * 子弹速度（每次子弹移动数值）
      */
@@ -42,13 +44,26 @@ public class Bullet {
     /**
      * 窗口实例
      */
-    private TankFrame tankFrame = null;
+    private TankFrame tankFrame;
+    /**
+     * Rectangle属性
+     */
+    private Rectangle rectangle = new Rectangle();
+    /**
+     * 是否存活
+     */
+    private Boolean living = true;
+    /**
+     * 坦克归属（好，坏）
+     */
+    private Group group = Group.Bad;
 
-    public Bullet (int x, int y, Dir dir, TankFrame tankFrame) {
+    public Bullet (int x, int y, Dir dir, TankFrame tankFrame, Group group) {
         this.x = x;
         this.y = y;
         this.dir = dir;
         this.tankFrame = tankFrame;
+        this.group = group;
     }
 
     /**
@@ -56,17 +71,53 @@ public class Bullet {
      * @param g 画笔
      */
     public void paint(Graphics g) {
-        Color color = g.getColor();
-        g.setColor(Color.YELLOW);
-        g.fillRect(x, y, bulletWidth, bulletHeight);
-        g.setColor(color);
+        if (!living) {
+            tankFrame.bulletList.remove(this);
+        }
+
+        switch (dir) {
+            case RIGHT:
+                bulletWidth = ResourceManager.bulletR.getWidth();
+                bulletHeight = ResourceManager.bulletR.getHeight();
+
+                g.drawImage(ResourceManager.bulletR, x, y, null);
+                break;
+            case LEFT:
+                bulletWidth = ResourceManager.bulletL.getWidth();
+                bulletHeight = ResourceManager.bulletL.getHeight();
+
+                g.drawImage(ResourceManager.bulletL, x, y, null);
+                break;
+            case DOWN:
+                bulletWidth = ResourceManager.bulletD.getWidth();
+                bulletHeight = ResourceManager.bulletD.getHeight();
+
+                g.drawImage(ResourceManager.bulletD, x, y, null);
+                break;
+            case UP:
+                bulletWidth = ResourceManager.bulletU.getWidth();
+                bulletHeight = ResourceManager.bulletU.getHeight();
+
+                g.drawImage(ResourceManager.bulletU, x, y, null);
+                break;
+        }
         moving();
 
-        if (this.x < 0 || this.y < 0 || this.x > Constant.FrameSizeWidth || this.y > Constant.FrameSizeHeight) {
+        if (x < 0 || y < 0 || x > Constant.FrameSizeWidth || y > Constant.FrameSizeHeight) {
             tankFrame.bulletList.remove(this);
         }
     }
 
+    /**
+     * 死亡
+     */
+    public void die() {
+        this.living = false;
+    }
+
+    /**
+     * 移动子弹
+     */
     private void moving(){
         switch (dir) {
             case UP:
@@ -84,12 +135,13 @@ public class Bullet {
         }
     }
 
-    public Dir getDir() {
-        return dir;
+    public Group getGroup() {
+        return group;
     }
 
-    public void setDir(Dir dir) {
-        this.dir = dir;
+    public Rectangle getRectangle() {
+        rectangle.setBounds(x, y, bulletWidth, bulletHeight);
+        return rectangle;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.example.tank.frame;
 import com.example.tank.entity.Bullet;
 import com.example.tank.entity.Tank;
 import com.example.tank.enums.Dir;
+import com.example.tank.enums.Group;
 import com.example.tank.util.Constant;
 
 import java.awt.*;
@@ -12,6 +13,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author:wangxiaorui
@@ -19,8 +21,13 @@ import java.util.List;
  */
 public class TankFrame extends Frame{
 
-    Tank myTank = new Tank(Constant.tankDefaultX, Constant.tankDefaultY, Constant.tankDefaultDir, this);
+    Tank myTank = new Tank(Constant.tankDefaultX, Constant.tankDefaultY, Constant.tankDefaultDir, this, Group.Good);
+
     public List<Bullet> bulletList = new ArrayList<Bullet>();
+
+    public List<Tank> enemyTankList = new ArrayList<Tank>();
+
+    public Random random = new Random();
 
     public TankFrame() {
         this.setSize(Constant.FrameSizeWidth, Constant.FrameSizeHeight);
@@ -66,9 +73,39 @@ public class TankFrame extends Frame{
     @Override
     public void paint(Graphics g){
         myTank.paint(g);
-        //bullet.paint(g);
+        /*//这种方式循环在删除的时候会引起错误，迭代器迭代过程中删除元素
         for (Bullet bullet : bulletList) {
             bullet.paint(g);
+        }*/
+        //绘制所有子弹
+        for (int i = 0; i < bulletList.size(); i++) {
+            bulletList.get(i).paint(g);
+        }
+        //绘制所有敌方坦克
+        for (int i = 0; i < enemyTankList.size(); i++) {
+            enemyTankList.get(i).paint(g);
+        }
+        //碰撞检测
+        for (Bullet bullet : bulletList){
+            for (Tank tank : enemyTankList){
+                collisionDetection(bullet, tank);
+            }
+        }
+    }
+
+    private void collisionDetection(Bullet bullet, Tank tank) {
+        //区分组，避免误伤友方
+        if (bullet.getGroup() == tank.getGroup()) {
+            return;
+        }
+
+        //得到子弹和坦克的区域
+        Rectangle rectangle1 = bullet.getRectangle();
+        Rectangle rectangle2 = tank.getRectangle();
+
+        if (rectangle1.intersects(rectangle2)){
+            bullet.die();
+            tank.die();
         }
     }
 
