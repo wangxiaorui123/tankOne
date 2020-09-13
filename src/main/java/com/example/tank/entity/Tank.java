@@ -3,9 +3,11 @@ package com.example.tank.entity;
 import com.example.tank.enums.Dir;
 import com.example.tank.enums.Group;
 import com.example.tank.frame.TankFrame;
+import com.example.tank.util.Constant;
 import com.example.tank.util.ResourceManager;
 
 import java.awt.*;
+import java.util.Random;
 
 /**
  * @Project : tank
@@ -19,11 +21,11 @@ public class Tank {
     /**
      * 坦克宽度
      */
-    private int TankWidth = ResourceManager.tankU.getWidth();
+    public int TankWidth = ResourceManager.badTankL.getWidth();
     /**
      * 坦克高度
      */
-    private int TankHeight = ResourceManager.tankU.getHeight();
+    public int TankHeight = ResourceManager.badTankL.getHeight();
     /**
      * 子弹宽度(用于计算子弹发射位置)
      */
@@ -43,7 +45,7 @@ public class Tank {
     /**
      * 坦克速度（每次坦克移动数值）
      */
-    private final int SPEED = 2;
+    private final int SPEED = 3;
     /**
      * 坦克方向
      */
@@ -68,6 +70,10 @@ public class Tank {
      * 是否存活
      */
     private Boolean living = true;
+    /**
+     * 敌方坦克上次换方向的时间
+     */
+    private long changeDirTime = 0L;
 
     public Tank (int x, int y, Dir dir, TankFrame tankFrame, Group group){
         this.x = x;
@@ -88,39 +94,88 @@ public class Tank {
 
         switch (dir) {
             case RIGHT:
-                TankWidth = ResourceManager.tankR.getWidth();
-                TankHeight = ResourceManager.tankR.getHeight();
                 bulletWidth = ResourceManager.bulletR.getWidth();
                 bulletHeight = ResourceManager.bulletR.getHeight();
+                if (this.group == Group.Bad){
+                    TankWidth = ResourceManager.badTankR.getWidth();
+                    TankHeight = ResourceManager.badTankR.getHeight();
 
-                g.drawImage(ResourceManager.tankR, x, y, null);
+                    g.drawImage(ResourceManager.badTankR, x, y, null);
+                } else {
+                    TankWidth = ResourceManager.goodTankR.getWidth();
+                    TankHeight = ResourceManager.goodTankR.getHeight();
+
+                    g.drawImage(ResourceManager.goodTankR, x, y, null);
+                }
                 break;
             case LEFT:
-                TankWidth = ResourceManager.tankL.getWidth();
-                TankHeight = ResourceManager.tankL.getHeight();
                 bulletWidth = ResourceManager.bulletL.getWidth();
                 bulletHeight = ResourceManager.bulletL.getHeight();
+                if (this.group == Group.Bad){
+                    TankWidth = ResourceManager.badTankL.getWidth();
+                    TankHeight = ResourceManager.badTankL.getHeight();
 
-                g.drawImage(ResourceManager.tankL, x, y, null);
+                    g.drawImage(ResourceManager.badTankL, x, y, null);
+                } else {
+                    TankWidth = ResourceManager.goodTankL.getWidth();
+                    TankHeight = ResourceManager.goodTankL.getHeight();
+
+                    g.drawImage(ResourceManager.goodTankL, x, y, null);
+                }
                 break;
             case DOWN:
-                TankWidth = ResourceManager.tankD.getWidth();
-                TankHeight = ResourceManager.tankD.getHeight();
                 bulletWidth = ResourceManager.bulletD.getWidth();
                 bulletHeight = ResourceManager.bulletD.getHeight();
+                if (this.group == Group.Bad){
+                    TankWidth = ResourceManager.badTankD.getWidth();
+                    TankHeight = ResourceManager.badTankD.getHeight();
 
-                g.drawImage(ResourceManager.tankD, x, y, null);
+                    g.drawImage(ResourceManager.badTankD, x, y, null);
+                } else {
+                    TankWidth = ResourceManager.goodTankD.getWidth();
+                    TankHeight = ResourceManager.goodTankD.getHeight();
+
+                    g.drawImage(ResourceManager.goodTankD, x, y, null);
+                }
                 break;
             case UP:
-                TankWidth = ResourceManager.tankU.getWidth();
-                TankHeight = ResourceManager.tankU.getHeight();
                 bulletWidth = ResourceManager.bulletU.getWidth();
                 bulletHeight = ResourceManager.bulletU.getHeight();
+                if (this.group == Group.Bad){
+                    TankWidth = ResourceManager.badTankU.getWidth();
+                    TankHeight = ResourceManager.badTankU.getHeight();
 
-                g.drawImage(ResourceManager.tankU, x, y, null);
+                    g.drawImage(ResourceManager.badTankU, x, y, null);
+                } else {
+                    TankWidth = ResourceManager.goodTankU.getWidth();
+                    TankHeight = ResourceManager.goodTankU.getHeight();
+
+                    g.drawImage(ResourceManager.goodTankU, x, y, null);
+                }
                 break;
         }
         moving();
+
+        //不允许超出边界,判定是否超出边界
+        isCrossBorder();
+    }
+
+    /**
+     * 判定是否超出边界
+     */
+    private void isCrossBorder() {
+        if (x < 0) {
+            x = 0;
+        }
+        if (y < 0 + this.TankHeight/2) {
+            y = 0 + this.TankHeight/2;
+        }
+        if (x > Constant.FrameSizeWidth - this.TankWidth) {
+            x = Constant.FrameSizeWidth - this.TankWidth;
+        }
+        if (y > Constant.FrameSizeHeight - this.TankHeight) {
+            y = Constant.FrameSizeHeight - this.TankHeight;
+        }
     }
 
     /**
@@ -145,9 +200,21 @@ public class Tank {
                 break;
         }
 
-        if (tankFrame.random.nextInt(100) > 90) {
+        if (Group.Bad == this.group && tankFrame.random.nextInt(100) > 95) {
             fire();
         }
+
+        if (Group.Bad == this.group && (System.currentTimeMillis()/1000 - changeDirTime) > 2){
+            changeDirTime();
+        }
+    }
+
+    /**
+     * 改变方向
+     */
+    private void changeDirTime() {
+        this.dir = Dir.values()[tankFrame.random.nextInt(4)];
+        changeDirTime = System.currentTimeMillis()/1000;
     }
 
     /**
@@ -175,10 +242,18 @@ public class Tank {
      */
     public void die() {
         living = false;
+
+        int eX = this.x + this.TankWidth/2 - Explode.explodeWidth/2;
+        int eY = this.y + this.TankHeight/2 - Explode.explodeHeight/2;
+        tankFrame.explodeList.add(new Explode(eX, eY, tankFrame));
     }
 
     public Group getGroup() {
         return group;
+    }
+
+    public Boolean getLiving() {
+        return living;
     }
 
     public Rectangle getRectangle() {

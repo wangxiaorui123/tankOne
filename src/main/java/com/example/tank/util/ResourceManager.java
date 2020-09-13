@@ -15,7 +15,8 @@ import java.util.Objects;
  */
 public class ResourceManager {
     //坦克的图片
-    public static BufferedImage tankL, tankU, tankR, tankD;
+    public static BufferedImage goodTankL, goodTankU, goodTankR, goodTankD;
+    public static BufferedImage badTankL, badTankU, badTankR, badTankD;
     //子弹的图片
     public static BufferedImage bulletL, bulletU, bulletR, bulletD;
     //爆炸效果
@@ -24,10 +25,15 @@ public class ResourceManager {
     //加载图片
     static {
         try {
-            tankL = ImageIO.read(Objects.requireNonNull(ResourceManager.class.getClassLoader().getResourceAsStream("images/tankL.gif")));
-            tankU = ImageIO.read(Objects.requireNonNull(ResourceManager.class.getClassLoader().getResourceAsStream("images/tankU.gif")));
-            tankR = ImageIO.read(Objects.requireNonNull(ResourceManager.class.getClassLoader().getResourceAsStream("images/tankR.gif")));
-            tankD = ImageIO.read(Objects.requireNonNull(ResourceManager.class.getClassLoader().getResourceAsStream("images/tankD.gif")));
+            goodTankU = ImageIO.read(ResourceManager.class.getClassLoader().getResourceAsStream("images/GoodTank1.png"));
+            goodTankL = ImageUtil.rotateImage(goodTankU, -90);
+            goodTankR = ImageUtil.rotateImage(goodTankU, 90);
+            goodTankD = ImageUtil.rotateImage(goodTankU, 180);
+
+            badTankU = ImageIO.read(ResourceManager.class.getClassLoader().getResourceAsStream("images/BadTank1.png"));
+            badTankL = ImageUtil.rotateImage(badTankU, -90);
+            badTankR = ImageUtil.rotateImage(badTankU, 90);
+            badTankD = ImageUtil.rotateImage(badTankU, 180);
 
             bulletL = ImageIO.read(Objects.requireNonNull(ResourceManager.class.getClassLoader().getResourceAsStream("images/bulletL.gif")));
             bulletU = ImageIO.read(Objects.requireNonNull(ResourceManager.class.getClassLoader().getResourceAsStream("images/bulletU.gif")));

@@ -1,6 +1,7 @@
 package com.example.tank.frame;
 
 import com.example.tank.entity.Bullet;
+import com.example.tank.entity.Explode;
 import com.example.tank.entity.Tank;
 import com.example.tank.enums.Dir;
 import com.example.tank.enums.Group;
@@ -23,10 +24,14 @@ public class TankFrame extends Frame{
 
     Tank myTank = new Tank(Constant.tankDefaultX, Constant.tankDefaultY, Constant.tankDefaultDir, this, Group.Good);
 
+    //子弹集合
     public List<Bullet> bulletList = new ArrayList<Bullet>();
 
+    //敌方坦克集合
     public List<Tank> enemyTankList = new ArrayList<Tank>();
 
+    //爆炸集合
+    public List<Explode> explodeList = new ArrayList<Explode>();
     public Random random = new Random();
 
     public TankFrame() {
@@ -85,12 +90,22 @@ public class TankFrame extends Frame{
         for (int i = 0; i < enemyTankList.size(); i++) {
             enemyTankList.get(i).paint(g);
         }
+        //绘制死亡爆炸
+        for (int i = 0; i < explodeList.size(); i++) {
+            explodeList.get(i).paint(g);
+        }
         //碰撞检测
         for (Bullet bullet : bulletList){
             for (Tank tank : enemyTankList){
                 collisionDetection(bullet, tank);
             }
+            collisionDetection(bullet, myTank);
         }
+
+        if (!myTank.getLiving()){
+            //System.out.println("游戏结束");
+        }
+
     }
 
     private void collisionDetection(Bullet bullet, Tank tank) {
