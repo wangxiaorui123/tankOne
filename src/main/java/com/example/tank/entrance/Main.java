@@ -24,5 +24,8 @@ public class Main {
             Thread.sleep(50);
             tank.repaint();
         }
+//        int a = 8;
+//        a = (a++)+a;
+//        System.out.println(a);
     }
 }
